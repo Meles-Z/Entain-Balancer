@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Transaction interface {
+type TransactionRepository interface {
 	CreateTransaction(transaction *entities.Transaction) error
 	GetTransactionByID(id string) (*entities.Transaction, error)
 	GetTransactionsByUserID(userID string) ([]*entities.Transaction, error)
@@ -16,7 +16,7 @@ type transactionRepository struct {
 	db *gorm.DB
 }
 
-func NewTransactionRepository(db *gorm.DB) Transaction {
+func NewTransactionRepository(db *gorm.DB) TransactionRepository {
 	return &transactionRepository{db: db}
 }
 
