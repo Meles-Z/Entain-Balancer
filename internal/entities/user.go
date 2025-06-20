@@ -1,12 +1,9 @@
 package entities
 
-import (
-	"time"
-)
-
 type User struct {
-	ID        uint64    `gorm:"primaryKey" json:"userId"`
-	Balance   float64   `gorm:"type:numeric(20,2);not null" json:"balance"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Model
+	Name     string `gorm:"type:varchar(100);not null" json:"name"`
+	Email    string `gorm:"type:varchar(100);uniqueIndex;not null" json:"email"`
+	Password string `gorm:"type:varchar(255);not null" json:"password"`
+	Balance  string `gorm:"type:numeric(20,2);not null" json:"balance"`
 }
