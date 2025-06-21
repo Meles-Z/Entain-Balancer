@@ -1,0 +1,15 @@
+# Build artifacts
+main
+*.exe
+
+# Dependencies
+vendor/
+
+# IDEs and tools
+.idea/
+.vscode/
+*.swp
+
+# Git
+.git
+.gitignore

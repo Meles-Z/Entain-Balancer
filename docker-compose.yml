@@ -10,28 +10,25 @@ services:
       - .env
     depends_on:
       - postgres-db
-    volumes:
-      - ./:/app
     ports:
-      - "${SERVER_PORT:-8080}:8080"  # Maps container's port 8080 to host
+      - "${SERVER_PORT:-8080}:8080"
+    # DON'T mount volume unless using live reload
+    volumes: []  # safe for production
 
   postgres-db:
-    image: postgres:17  # Use a stable release; 17 is not yet official but i use this for development only
+    image: postgres:17
     container_name: entainbalancer-db
     restart: unless-stopped
-
     env_file:
       - .env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-
     ports:
-      - "${DB_PORT:-5432}:5432"  # Expose to host; fallback to 5432
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s

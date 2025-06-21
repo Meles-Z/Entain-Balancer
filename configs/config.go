@@ -2,7 +2,6 @@ package configs
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/spf13/viper"
 )
@@ -23,8 +22,17 @@ type DatabaseConfig struct {
 
 // LoadConfig initializes and returns the application configuration
 func LoadConfig() (*Config, error) {
-	if err := initViper(); err != nil {
-		return nil, err
+	viper.AddConfigPath(".")
+	viper.SetConfigFile(".env")
+	viper.SetConfigType("env")
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			fmt.Println("Error reading config file:", err)
+			return nil, err
+		}
+		fmt.Println("No .env file found, using system env vars")
 	}
 
 	cfg := &Config{
@@ -38,22 +46,4 @@ func LoadConfig() (*Config, error) {
 	}
 
 	return cfg, nil
-}
-
-// initViper sets up the viper configuration reader
-func initViper() error {
-	viper.SetConfigFile(".env")
-	viper.SetConfigType("env")
-	viper.AddConfigPath(".")
-	viper.AutomaticEnv()
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Println("No .env file found. Falling back to system environment variables.")
-			return nil
-		}
-		return fmt.Errorf("failed to read config file: %w", err)
-	}
-	return nil
 }
