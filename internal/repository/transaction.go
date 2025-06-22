@@ -2,16 +2,17 @@ package repository
 
 import (
 	"github.com/meles-z/entainbalancer/internal/entities"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
 type TransactionRepository interface {
 	CreateTransaction(transaction *entities.Transaction) error
 	GetTransactionByID(id string) (*entities.Transaction, error)
-	GetTransactionsByUserID(userID string) ([]*entities.Transaction, error)
-	GetAllTransactions() ([]*entities.Transaction, error)
-	UpdateTransaction(transaction *entities.Transaction) error
+	GetUserByID(userID uint64) (*entities.User, error)
+	UpdateUserBalance(userID uint64, newBalance decimal.Decimal) error
 }
+
 type transactionRepository struct {
 	db *gorm.DB
 }
@@ -21,35 +22,27 @@ func NewTransactionRepository(db *gorm.DB) TransactionRepository {
 }
 
 func (r *transactionRepository) CreateTransaction(transaction *entities.Transaction) error {
-	if err := r.db.Create(transaction).Error; err != nil {
-		return err
-	}
-	return nil
+	return r.db.Create(transaction).Error
 }
+
 func (r *transactionRepository) GetTransactionByID(id string) (*entities.Transaction, error) {
-	var transaction entities.Transaction
-	if err := r.db.First(&transaction, "id = ?", id).Error; err != nil {
+	var tx entities.Transaction
+	if err := r.db.First(&tx, "transaction_id = ?", id).Error; err != nil {
 		return nil, err
 	}
-	return &transaction, nil
+	return &tx, nil
 }
-func (r *transactionRepository) GetTransactionsByUserID(userID string) ([]*entities.Transaction, error) {
-	var transactions []*entities.Transaction
-	if err := r.db.Where("user_id = ?", userID).Find(&transactions).Error; err != nil {
+
+func (r *transactionRepository) GetUserByID(userID uint64) (*entities.User, error) {
+	var user entities.User
+	if err := r.db.First(&user, "user_id = ?", userID).Error; err != nil {
 		return nil, err
 	}
-	return transactions, nil
+	return &user, nil
 }
-func (r *transactionRepository) GetAllTransactions() ([]*entities.Transaction, error) {
-	var transactions []*entities.Transaction
-	if err := r.db.Find(&transactions).Error; err != nil {
-		return nil, err
-	}
-	return transactions, nil
-}
-func (r *transactionRepository) UpdateTransaction(transaction *entities.Transaction) error {
-	if err := r.db.Save(transaction).Error; err != nil {
-		return err
-	}
-	return nil
+
+func (r *transactionRepository) UpdateUserBalance(userID uint64, newBalance decimal.Decimal) error {
+	return r.db.Model(&entities.User{}).
+		Where("user_id = ?", userID).
+		Update("balance", newBalance).Error
 }
