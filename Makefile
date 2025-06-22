@@ -14,3 +14,11 @@ restart:
 
 logs:
 	docker-compose logs -f
+
+populate_db:
+	@echo "Populating database..."
+	@go run scripts/populate_db/populate.go
+
+wipe_db:
+	@echo "Populating database..."
+	@go run scripts/wipe_db/wipe.go
