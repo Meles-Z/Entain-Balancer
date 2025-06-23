@@ -15,67 +15,73 @@ var (
 
 type TransactionService interface {
 	CreateTransaction(transaction *entities.Transaction) (*entities.Transaction, error)
-	GetTransactionByID(id string) (*entities.Transaction, error)
 	UpdateTransaction(transaction *entities.Transaction) error
 }
 
 type transactionService struct {
-	repo repository.TransactionRepository
+	repo     repository.TransactionRepository
+	userRepo repository.UserRepository
 }
 
-func NewTransactionService(repo repository.TransactionRepository) TransactionService {
-	return &transactionService{repo: repo}
-}
-
-func (s *transactionService) CreateTransaction(transaction *entities.Transaction) (*entities.Transaction, error) {
-	if err := s.repo.CreateTransaction(transaction); err != nil {
-		return nil, err
+func NewTransactionService(
+	repo repository.TransactionRepository,
+	userRepo repository.UserRepository,
+) TransactionService {
+	return &transactionService{
+		repo:     repo,
+		userRepo: userRepo,
 	}
-	return transaction, nil
 }
-
-func (s *transactionService) GetTransactionByID(id string) (*entities.Transaction, error) {
-	transaction, err := s.repo.GetTransactionByID(id)
+func (s *transactionService) CreateTransaction(transaction *entities.Transaction) (*entities.Transaction, error) {
+	transaction, err := s.repo.CreateTransaction(transaction)
 	if err != nil {
 		return nil, err
 	}
 	return transaction, nil
+	// Get user by ID
 }
 
 func (s *transactionService) UpdateTransaction(tx *entities.Transaction) error {
 	// Check if transaction already exists (idempotency)
-	existing, _ := s.repo.GetTransactionByID(tx.TransactionID)
-	if existing != nil {
+	exists, err := s.repo.IsTransactionExists(tx.TransactionID)
+	if err != nil {
+		return err
+	}
+	if exists {
 		return ErrTransactionAlreadyProcessed
 	}
 
-	// Get user and balance
-	user, err := s.repo.GetUserByID(tx.UserID)
+	// Get user
+	user, err := s.userRepo.GetUserByID(tx.UserID)
 	if err != nil {
 		return err
 	}
 
-	// Convert string amount to decimal
+	// Parse amount
 	amount, err := decimal.NewFromString(tx.Amount)
 	if err != nil {
 		return err
 	}
 
+	// Balance calculation
 	newBalance := user.Balance
-	if tx.State == entities.TransactionStateWin {
+	switch tx.State {
+	case entities.TransactionStateWin:
 		newBalance = newBalance.Add(amount)
-	} else if tx.State == entities.TransactionStateLose {
+	case entities.TransactionStateLose:
 		if user.Balance.LessThan(amount) {
 			return ErrInsufficientBalance
 		}
 		newBalance = newBalance.Sub(amount)
 	}
 
-	// Save transaction and update balance sequentially
-	if err := s.repo.CreateTransaction(tx); err != nil {
+	// Save transaction and update user balance
+	_, err = s.repo.CreateTransaction(tx)
+	if err != nil {
 		return err
 	}
-	if err := s.repo.UpdateUserBalance(tx.UserID, newBalance); err != nil {
+	user.Balance = newBalance
+	if err := s.userRepo.UpdateUser(user); err != nil {
 		return err
 	}
 

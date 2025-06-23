@@ -8,7 +8,6 @@ import (
 type UserService interface {
 	CreateUser(user *entities.User) (*entities.User, error)
 	GetUserByID(id uint64) (*entities.User, error)
-	GetUserByEmail(email string) (*entities.User, error)
 	UpdateUser(user *entities.User) error
 }
 
@@ -30,14 +29,6 @@ func (s *userService) CreateUser(user *entities.User) (*entities.User, error) {
 
 func (s *userService) GetUserByID(id uint64) (*entities.User, error) {
 	user, err := s.repo.GetUserByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
-}
-
-func (s *userService) GetUserByEmail(email string) (*entities.User, error) {
-	user, err := s.repo.GetUserByEmail(email)
 	if err != nil {
 		return nil, err
 	}

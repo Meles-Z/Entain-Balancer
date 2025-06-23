@@ -14,7 +14,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to load config:", err)
 	}
-	cfg.DB.Host= "localhost"
+	cfg.DB.Host = "localhost"
 
 	db, err := dbutils.InitDB(&cfg.DB)
 	if err != nil {
@@ -24,15 +24,15 @@ func main() {
 	// Create predefined users with IDs 1, 2, and 3 as required
 	users := []entities.User{
 		{
-			ID: 1,
+			ID:      1,
 			Balance: decimal.RequireFromString("1000.00"),
 		},
 		{
-			ID: 2,
+			ID:      2,
 			Balance: decimal.RequireFromString("2000.00"),
 		},
 		{
-			ID: 3,
+			ID:      3,
 			Balance: decimal.RequireFromString("3000.00"),
 		},
 	}
@@ -46,5 +46,42 @@ func main() {
 			log.Fatalf("Failed to create user %d: %v", u.ID, err)
 		}
 	}
+
+	transactions := []entities.Transaction{
+		{
+			TransactionID: "tx1",
+			UserID:        1,
+			State:         entities.TransactionStateWin,
+			Amount:        "100.00",
+			SourceType:    entities.SourceTypeGame,
+		},
+		{
+			TransactionID: "tx2",
+			UserID:        2,
+			State:         entities.TransactionStateLose,
+			Amount:        "50.00",
+			SourceType:    entities.SourceTypeServer,
+		},
+		{
+			TransactionID: "tx3",
+			UserID:        3,
+			State:         entities.TransactionStateWin,
+			Amount:        "200.00",
+			SourceType:    entities.SourceTypePayment,
+		},
+	}
+	for _, tx := range transactions {
+		// Use FirstOrCreate to avoid duplicates if the app restarts
+		if err := db.FirstOrCreate(&tx, entities.Transaction{
+			TransactionID: tx.TransactionID,
+			UserID:        tx.UserID,
+			State:         tx.State,
+			Amount:        tx.Amount,
+			SourceType:    tx.SourceType,
+		}).Error; err != nil {
+			log.Fatalf("Failed to create transaction %s: %v", tx.TransactionID, err)
+		}
+	}
+
 	log.Println("Successfully created/verified users with IDs 1, 2, and 3")
 }

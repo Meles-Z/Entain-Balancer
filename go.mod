@@ -5,7 +5,6 @@ go 1.23.0
 toolchain go1.23.10
 
 require (
-	github.com/google/uuid v1.6.0
 	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/viper v1.20.1
 	gorm.io/driver/postgres v1.6.0

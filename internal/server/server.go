@@ -7,6 +7,9 @@ import (
 
 	"github.com/meles-z/entainbalancer/configs"
 	dbutils "github.com/meles-z/entainbalancer/internal/db_utils"
+	"github.com/meles-z/entainbalancer/internal/handlers"
+	"github.com/meles-z/entainbalancer/internal/repository"
+	"github.com/meles-z/entainbalancer/internal/service"
 )
 
 func Server() {
@@ -28,6 +31,19 @@ func Server() {
 	}
 
 	fmt.Println("Migrations completed successfully")
+
+	userRepo := repository.NewUserRepository(db)
+	userService := service.NewUserService(userRepo)
+
+	txRepo := repository.NewTransactionRepository(db)
+	txService := service.NewTransactionService(txRepo, userRepo)
+
+	handler := handlers.NewHandler(userService, txService)
+
+	Route(handler)
+
+	log.Println("Server listening on :8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 
 	log.Println("🚀 Server started at :8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {

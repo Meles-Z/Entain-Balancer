@@ -2,9 +2,6 @@ package entities
 
 import (
 	"time"
-
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type TransactionState string
@@ -29,10 +26,5 @@ type Transaction struct {
 	Amount        string           `gorm:"type:numeric(20,2);not null" json:"amount"`
 	SourceType    SourceType       `gorm:"type:varchar(20);not null" json:"sourceType"`
 	CreatedAt     time.Time        `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-}
-
-func (t *Transaction) BeforeCreate(tx *gorm.DB) (error error) {
-	t.TransactionID = uuid.NewString()
-	return
+	UpdatedAt     time.Time        `json:"updatedAt"`
 }

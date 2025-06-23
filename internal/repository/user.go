@@ -8,7 +8,6 @@ import (
 type UserRepository interface {
 	CreateUser(user *entities.User) (*entities.User, error)
 	GetUserByID(id uint64) (*entities.User, error)
-	GetUserByEmail(email string) (*entities.User, error)
 	UpdateUser(user *entities.User) error
 }
 
@@ -34,15 +33,9 @@ func (r *userRepository) GetUserByID(id uint64) (*entities.User, error) {
 	}
 	return &user, nil
 }
-func (r *userRepository) GetUserByEmail(email string) (*entities.User, error) {
-	var user entities.User
-	if err := r.db.First(&user, "email = ?", email).Error; err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
+
 func (r *userRepository) UpdateUser(user *entities.User) error {
-	if err := r.db.Save(user).Error; err != nil {
+	if err := r.db.Model(&entities.User{}).Where("id = ?", user.ID).Update("balance", user.Balance).Error; err != nil {
 		return err
 	}
 	return nil

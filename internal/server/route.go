@@ -1,13 +1,33 @@
 package server
 
-// func Route(h *handler.Handler) {
-// 	h.Router.HandleFunc("/health", h.HealthCheck).Methods("GET")
-// 	h.Router.HandleFunc("/balance", h.GetBalance).Methods("GET")
-// 	h.Router.HandleFunc("/balance/{userID}", h.GetUserBalance).Methods("GET")
-// 	h.Router.HandleFunc("/transaction", h.CreateTransaction).Methods("POST")
-// 	h.Router.HandleFunc("/transaction/{id}", h.GetTransaction).Methods("GET")
-// 	h.Router.HandleFunc("/transactions", h.GetAllTransactions).Methods("GET")
-// 	h.Router.HandleFunc("/escrow", h.CreateEscrow).Methods("POST")
-// 	h.Router.HandleFunc("/escrow/{id}", h.GetEscrow).Methods("GET")
-// 	h.Router.HandleFunc("/escrows", h.GetAllEscrows).Methods("GET")
-// }
+import (
+	"net/http"
+	"strings"
+
+	"github.com/meles-z/entainbalancer/internal/handlers"
+)
+
+func Route(h *handlers.Handler) {
+	// Handles /user/{userId}/transaction and /user/{userId}/balance
+	http.HandleFunc("/user/", func(w http.ResponseWriter, r *http.Request) {
+		path := strings.Trim(r.URL.Path, "/") // Remove leading/trailing slashes
+		parts := strings.Split(path, "/")     // Split by "/"
+
+		if len(parts) == 3 && parts[0] == "user" {
+			switch parts[2] {
+			case "transaction":
+				if r.Method == http.MethodPost {
+					h.UpdateTransaction(w, r)
+					return
+				}
+			case "balance":
+				if r.Method == http.MethodGet {
+					h.GetUserBalance(w, r)
+					return
+				}
+			}
+		}
+
+		http.Error(w, "Not Found", http.StatusNotFound)
+	})
+}
