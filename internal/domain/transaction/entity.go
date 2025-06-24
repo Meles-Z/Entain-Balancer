@@ -1,4 +1,5 @@
-package entities
+package transaction
+
 
 import (
 	"time"

@@ -1,20 +1,21 @@
-package dbutils
+package db
 
 import (
 	"fmt"
 
-	"github.com/meles-z/entainbalancer/internal/entities"
+	"github.com/meles-z/entainbalancer/internal/domain/transaction"
+	"github.com/meles-z/entainbalancer/internal/domain/user"
 	"gorm.io/gorm"
 )
 
 func RunMigrations(db *gorm.DB) error {
 	err := db.AutoMigrate(
-		&entities.User{},
-		&entities.Transaction{},
+		&user.User{},
+		&transaction.Transaction{},
 	)
 	if err != nil {
 		return fmt.Errorf("migration failed: %w", err)
 	}
-	fmt.Println("✅ AutoMigration completed")
+
 	return nil
 }

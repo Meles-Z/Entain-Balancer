@@ -1,12 +1,11 @@
-package repository
+package transaction
 
 import (
-	"github.com/meles-z/entainbalancer/internal/entities"
 	"gorm.io/gorm"
 )
 
 type TransactionRepository interface {
-	CreateTransaction(transaction *entities.Transaction) (*entities.Transaction, error)
+	CreateTransaction(transaction *Transaction) (*Transaction, error)
 	IsTransactionExists(id string) (bool, error)
 	WithTrx(fn func(txRepo TransactionRepository) error) error
 }
@@ -19,7 +18,7 @@ func NewTransactionRepository(db *gorm.DB) TransactionRepository {
 	return &transactionRepository{db: db}
 }
 
-func (r *transactionRepository) CreateTransaction(transaction *entities.Transaction) (*entities.Transaction, error) {
+func (r *transactionRepository) CreateTransaction(transaction *Transaction) (*Transaction, error) {
 	if err := r.db.Create(&transaction).Error; err != nil {
 		return nil, err
 	}
@@ -28,7 +27,7 @@ func (r *transactionRepository) CreateTransaction(transaction *entities.Transact
 
 func (r *transactionRepository) IsTransactionExists(id string) (bool, error) {
 	var count int64
-	if err := r.db.Model(&entities.Transaction{}).
+	if err := r.db.Model(&Transaction{}).
 		Where("transaction_id = ?", id).
 		Count(&count).Error; err != nil {
 		return false, err

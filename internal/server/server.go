@@ -1,47 +1,53 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
-	"github.com/meles-z/entainbalancer/configs"
-	dbutils "github.com/meles-z/entainbalancer/internal/db_utils"
-	"github.com/meles-z/entainbalancer/internal/handlers"
-	"github.com/meles-z/entainbalancer/internal/repository"
-	"github.com/meles-z/entainbalancer/internal/service"
+	"github.com/meles-z/entainbalancer/internal/config"
+	httpHandler "github.com/meles-z/entainbalancer/internal/delivery/http"
+	"github.com/meles-z/entainbalancer/internal/domain/transaction"
+	uow "github.com/meles-z/entainbalancer/internal/domain/unit_of_work"
+	"github.com/meles-z/entainbalancer/internal/domain/user"
+	"github.com/meles-z/entainbalancer/internal/infrastucture/db"
+	"github.com/meles-z/entainbalancer/internal/infrastucture/logger"
 )
 
 func Server() {
-	cfg, err := configs.LoadConfig()
+	cfg, err := config.LoadConfig()
 	if err != nil {
-		fmt.Printf("Error to load configuration: %v\n", err)
-		return
+		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	db, err := dbutils.InitDB(&cfg.DB)
+	if err := logger.Init(cfg.Auth.Appenv); err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+	defer logger.Sync()
+
+	log.Println("Local development environment started.")
+
+	dbconn, err := db.InitDB(&cfg.DB)
 	if err != nil {
-		fmt.Printf("Error to connect to database: %v\n", err)
-		return
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	fmt.Println("Database connection established successfully")
+	log.Println("Database connection established successfully")
 
-	if err := dbutils.RunMigrations(db); err != nil {
-		fmt.Printf("Error running migrations: %v\n", err)
-		return
+	if err := db.RunMigrations(dbconn); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
 	}
-	fmt.Println("Migrations completed successfully")
+	log.Println("Migrations completed successfully")
 
-	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo)
+	userRepo := user.NewUserRepository(dbconn)
+	userService := user.NewUserService(userRepo)
 
-	uow := repository.NewUnitOfWork(db)
-	txService := service.NewTransactionService(uow)
+	uow := uow.NewUnitOfWork(dbconn)
+	txService := transaction.NewTransactionService(uow)
 
-	handler := handlers.NewHandler(userService, txService)
-
+	handler := httpHandler.NewHandler(userService, txService)
 	router := Route(handler)
 
 	log.Println("🚀 Server listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	if err := http.ListenAndServe(":8080", router); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }

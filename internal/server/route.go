@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/meles-z/entainbalancer/internal/handlers"
+	httpHandler "github.com/meles-z/entainbalancer/internal/delivery/http"
 )
 
-func Route(h *handlers.Handler) http.Handler {
+func Route(h *httpHandler.Handler) http.Handler {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/user/{userId}/transaction", h.UpdateTransaction).Methods("POST")

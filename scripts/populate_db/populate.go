@@ -3,26 +3,27 @@ package main
 import (
 	"log"
 
-	"github.com/meles-z/entainbalancer/configs"
-	dbutils "github.com/meles-z/entainbalancer/internal/db_utils"
-	"github.com/meles-z/entainbalancer/internal/entities"
+	"github.com/meles-z/entainbalancer/internal/config"
+	"github.com/meles-z/entainbalancer/internal/domain/transaction"
+	"github.com/meles-z/entainbalancer/internal/domain/user"
+	"github.com/meles-z/entainbalancer/internal/infrastucture/db"
 	"github.com/shopspring/decimal"
 )
 
 func main() {
-	cfg, err := configs.LoadConfig()
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal("Failed to load config:", err)
 	}
 	cfg.DB.Host = "localhost"
 
-	db, err := dbutils.InitDB(&cfg.DB)
+	db, err := db.InitDB(&cfg.DB)
 	if err != nil {
 		log.Fatal("Failed to initialize database:", err)
 	}
 
 	// Create predefined users with IDs 1, 2, and 3 as required
-	users := []entities.User{
+	users := []user.User{
 		{
 			ID:      1,
 			Balance: decimal.RequireFromString("1000.00"),
@@ -40,39 +41,39 @@ func main() {
 	for _, u := range users {
 		// Use FirstOrCreate to avoid duplicates if the app restarts
 		if u.Balance.IsNegative() {
-			log.Fatalf("User balance cannot be negative: %s", u.Balance)
+			log.Fatalf("transaction balance cannot be negative: %s", u.Balance)
 		}
-		if err := db.FirstOrCreate(&u, entities.User{ID: u.ID}).Error; err != nil {
+		if err := db.FirstOrCreate(&u, user.User{ID: u.ID}).Error; err != nil {
 			log.Fatalf("Failed to create user %d: %v", u.ID, err)
 		}
 	}
 
-	transactions := []entities.Transaction{
+	transactions := []transaction.Transaction{
 		{
 			TransactionID: "tx1",
 			UserID:        1,
-			State:         entities.TransactionStateWin,
+			State:         transaction.TransactionStateWin,
 			Amount:        "100.00",
-			SourceType:    entities.SourceTypeGame,
+			SourceType:    transaction.SourceTypeGame,
 		},
 		{
 			TransactionID: "tx2",
 			UserID:        2,
-			State:         entities.TransactionStateLose,
+			State:         transaction.TransactionStateLose,
 			Amount:        "50.00",
-			SourceType:    entities.SourceTypeServer,
+			SourceType:    transaction.SourceTypeServer,
 		},
 		{
 			TransactionID: "tx3",
 			UserID:        3,
-			State:         entities.TransactionStateWin,
+			State:         transaction.TransactionStateWin,
 			Amount:        "200.00",
-			SourceType:    entities.SourceTypePayment,
+			SourceType:    transaction.SourceTypePayment,
 		},
 	}
 	for _, tx := range transactions {
 		// Use FirstOrCreate to avoid duplicates if the app restarts
-		if err := db.FirstOrCreate(&tx, entities.Transaction{
+		if err := db.FirstOrCreate(&tx, transaction.Transaction{
 			TransactionID: tx.TransactionID,
 			UserID:        tx.UserID,
 			State:         tx.State,

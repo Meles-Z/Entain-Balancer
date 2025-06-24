@@ -15,11 +15,12 @@ down:
 	@echo "Stopping containers..."
 	@docker-compose down
 
+logs:
+	@echo "Following container logs..."
+	@docker-compose logs -f
 
 restart: down up  
 
-logs:
-	@docker-compose logs -f
 
 # ======================
 # Database Management

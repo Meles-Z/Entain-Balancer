@@ -1,17 +1,16 @@
-package dbutils
+package db
 
 import (
 	"fmt"
-	"log"
 	"time"
 
-	"github.com/meles-z/entainbalancer/configs"
+	"github.com/meles-z/entainbalancer/internal/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 // InitDB initializes and returns a GORM database connection
-func InitDB(cfg *configs.DatabaseConfig) (*gorm.DB, error) {
+func InitDB(cfg *config.DatabaseConfig) (*gorm.DB, error) {
 	if cfg.Host == "" || cfg.Port == 0 || cfg.DBName == "" || cfg.User == "" {
 		return nil, fmt.Errorf("incomplete database configuration")
 	}
@@ -34,7 +33,5 @@ func InitDB(cfg *configs.DatabaseConfig) (*gorm.DB, error) {
 	sqlDB.SetMaxIdleConns(20)
 	sqlDB.SetMaxOpenConns(50)
 	sqlDB.SetConnMaxLifetime(30 * time.Minute)
-
-	log.Println("✅ Database connected successfully")
 	return db, nil
 }

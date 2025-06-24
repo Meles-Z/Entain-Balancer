@@ -1,10 +1,9 @@
-package service
+package transaction
 
 import (
 	"errors"
 
-	"github.com/meles-z/entainbalancer/internal/entities"
-	"github.com/meles-z/entainbalancer/internal/repository"
+	"github.com/meles-z/entainbalancer/internal/domain/user"
 	"github.com/shopspring/decimal"
 )
 
@@ -14,12 +13,12 @@ var (
 )
 
 type TransactionService interface {
-	CreateTransaction(transaction *entities.Transaction) (*entities.Transaction, error)
-	UpdateTransaction(transaction *entities.Transaction) error
+	CreateTransaction(transaction *Transaction) (*Transaction, error)
+	UpdateTransaction(transaction *Transaction) error
 }
 
 type UnitOfWork interface {
-	WithTransaction(func(txRepo repository.TransactionRepository, userRepo repository.UserRepository) error) error
+	WithTransaction(func(txRepo TransactionRepository, userRepo user.UserRepository) error) error
 }
 
 type transactionService struct {
@@ -30,9 +29,9 @@ func NewTransactionService(uow UnitOfWork) TransactionService {
 	return &transactionService{uow: uow}
 }
 
-func (s *transactionService) CreateTransaction(transaction *entities.Transaction) (*entities.Transaction, error) {
-	var result *entities.Transaction
-	err := s.uow.WithTransaction(func(txRepo repository.TransactionRepository, _ repository.UserRepository) error {
+func (s *transactionService) CreateTransaction(transaction *Transaction) (*Transaction, error) {
+	var result *Transaction
+	err := s.uow.WithTransaction(func(txRepo TransactionRepository, _ user.UserRepository) error {
 		var err error
 		result, err = txRepo.CreateTransaction(transaction)
 		return err
@@ -40,8 +39,8 @@ func (s *transactionService) CreateTransaction(transaction *entities.Transaction
 	return result, err
 }
 
-func (s *transactionService) UpdateTransaction(tx *entities.Transaction) error {
-	return s.uow.WithTransaction(func(txRepo repository.TransactionRepository, userRepo repository.UserRepository) error {
+func (s *transactionService) UpdateTransaction(tx *Transaction) error {
+	return s.uow.WithTransaction(func(txRepo TransactionRepository, userRepo user.UserRepository) error {
 		// Idempotency check
 		exists, err := txRepo.IsTransactionExists(tx.TransactionID)
 		if err != nil {
@@ -66,9 +65,9 @@ func (s *transactionService) UpdateTransaction(tx *entities.Transaction) error {
 		// Balance calculation
 		newBalance := user.Balance
 		switch tx.State {
-		case entities.TransactionStateWin:
+		case TransactionStateWin:
 			newBalance = newBalance.Add(amount)
-		case entities.TransactionStateLose:
+		case TransactionStateLose:
 			if user.Balance.LessThan(amount) {
 				return ErrInsufficientBalance
 			}

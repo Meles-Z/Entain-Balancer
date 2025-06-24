@@ -1,13 +1,13 @@
-package handlers
+package http
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/meles-z/entainbalancer/internal/dto"
+	"github.com/meles-z/entainbalancer/internal/domain/user"
+	"github.com/meles-z/entainbalancer/internal/infrastucture/logger"
 )
 
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
@@ -17,22 +17,34 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil || userID == 0 {
+		logger.Warn("Invalid user ID in request", "userId", userIDStr)
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
+
 	// Fetch user balance from service
 	userBalance, err := h.UserService.GetUserByID(userID)
 	if err != nil {
-		log.Printf("Failed to get user balance for ID %d: %v\n", userID, err)
+		logger.Error("Failed to get user balance",
+			"userId", userID,
+			"error", err,
+		)
 		http.Error(w, "Failed to get user balance", http.StatusInternalServerError)
 		return
 	}
 
 	// Prepare response
-	response := dto.BalanceResponse{
-		UserID:  userID,
-		Balance: userBalance.Balance.StringFixed(2),
+	response := user.BalanceResponse{
+		UserID:    userID,
+		Balance:   userBalance.Balance.StringFixed(2),
+		CreatedAt: userBalance.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: userBalance.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
+
+	logger.Info("User balance fetched successfully",
+		"userId", userID,
+		"balance", response.Balance,
+	)
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(response)
