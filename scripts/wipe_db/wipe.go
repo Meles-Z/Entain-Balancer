@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/meles-z/entainbalancer/internal/config"
 	"github.com/meles-z/entainbalancer/internal/domain/transaction"
@@ -11,7 +13,6 @@ import (
 )
 
 func main() {
-
 	// Load configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
@@ -29,20 +30,22 @@ func main() {
 		logger.Fatal("Failed to initialize database:", "error", err)
 	}
 
-	// Drop tables
-	tables := []any{
-		user.User{},
-		transaction.Transaction{},
+	// List of tables to clear
+	models := []any{
+		&user.User{},
+		&transaction.Transaction{},
 	}
 
-	for _, table := range tables {
-		if err := db.Migrator().DropTable(table); err != nil {
-			logger.Error("Error dropping table %T: %v\n", table, err)
+	for _, model := range models {
+		// Get the type name (e.g., "User", "Transaction")
+		modelName := reflect.TypeOf(model).Elem().Name()
+
+		if err := db.Exec("TRUNCATE TABLE users, transactions RESTART IDENTITY CASCADE").Error; err != nil {
+			logger.Error(fmt.Sprintf("Failed to clear table %s: %v", modelName, err))
 		} else {
-			logger.Info("Successfully dropped table %T\n", table)
+			logger.Info(fmt.Sprintf("Successfully cleared table %s", modelName))
 		}
 	}
 
-	log.Println("Database wiped successfully.")
-
+	log.Println("All specified tables cleared successfully.")
 }

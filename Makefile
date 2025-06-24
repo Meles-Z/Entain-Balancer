@@ -7,7 +7,7 @@ build:
 	@echo "Rebuilding containers..."
 	@docker-compose up --build -d
 
-up:
+run:
 	@echo "Starting containers..."
 	@docker-compose up -d
 
@@ -19,7 +19,7 @@ logs:
 	@echo "Following container logs..."
 	@docker-compose logs -f
 
-restart: down up  
+restart: down run 
 
 
 # ======================
