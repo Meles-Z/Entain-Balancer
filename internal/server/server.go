@@ -40,13 +40,8 @@ func Server() {
 
 	handler := handlers.NewHandler(userService, txService)
 
-	Route(handler)
+	router := Route(handler)
 
 	log.Println("Server listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
-
-	log.Println("🚀 Server started at :8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatalf("❌ Server failed: %v", err)
-	}
+	log.Fatal(http.ListenAndServe(":8080", router))
 }

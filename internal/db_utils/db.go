@@ -31,9 +31,9 @@ func InitDB(cfg *configs.DatabaseConfig) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to get DB instance from GORM: %w", err)
 	}
 
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetConnMaxLifetime(time.Hour)
+	sqlDB.SetMaxIdleConns(20)
+	sqlDB.SetMaxOpenConns(50)
+	sqlDB.SetConnMaxLifetime(30 * time.Minute)
 
 	log.Println("✅ Database connected successfully")
 	return db, nil

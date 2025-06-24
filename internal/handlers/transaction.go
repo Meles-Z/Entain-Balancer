@@ -5,35 +5,28 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/meles-z/entainbalancer/internal/dto"
 	"github.com/meles-z/entainbalancer/internal/entities"
 	"github.com/meles-z/entainbalancer/internal/service"
 )
 
 func (h *Handler) UpdateTransaction(w http.ResponseWriter, r *http.Request) {
-	// 1. Parse and validate URL path
-	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(parts) != 3 || parts[0] != "user" || parts[2] != "transaction" {
-		http.Error(w, "Invalid URL format", http.StatusBadRequest)
-		return
-	}
+	vars := mux.Vars(r)
+	userIDStr := vars["userId"]
 
-	userID, err := strconv.ParseUint(parts[1], 10, 64)
+	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil || userID == 0 {
-		http.Error(w, "Invalid userId", http.StatusBadRequest)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-
-	// 2. Validate Source-Type header
 	sourceType := r.Header.Get("Source-Type")
 	if sourceType != "game" && sourceType != "server" && sourceType != "payment" {
 		http.Error(w, "Invalid or missing Source-Type header", http.StatusBadRequest)
 		return
 	}
 
-	// 3. Decode and validate request body
 	var req dto.TransactionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -45,7 +38,6 @@ func (h *Handler) UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 4. Build transaction entity
 	transaction := &entities.Transaction{
 		TransactionID: req.TransactionID,
 		UserID:        userID,
@@ -54,7 +46,6 @@ func (h *Handler) UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 		SourceType:    entities.SourceType(sourceType),
 	}
 
-	// 5. Process transaction via service
 	err = h.TransactionService.UpdateTransaction(transaction)
 	if err != nil {
 		switch {
@@ -68,7 +59,6 @@ func (h *Handler) UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 6. Success response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(map[string]string{
