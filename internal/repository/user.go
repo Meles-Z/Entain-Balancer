@@ -9,6 +9,7 @@ type UserRepository interface {
 	CreateUser(user *entities.User) (*entities.User, error)
 	GetUserByID(id uint64) (*entities.User, error)
 	UpdateUser(user *entities.User) error
+	WithTrx(fn func(userRepo UserRepository) error) error
 }
 
 type userRepository struct {
@@ -39,4 +40,11 @@ func (r *userRepository) UpdateUser(user *entities.User) error {
 		return err
 	}
 	return nil
+}
+
+func (r *userRepository) WithTrx(fn func(userRepo UserRepository) error) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		userTrx := NewUserRepository(tx)
+		return fn(userTrx)
+	})
 }

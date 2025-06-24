@@ -8,6 +8,7 @@ import (
 type TransactionRepository interface {
 	CreateTransaction(transaction *entities.Transaction) (*entities.Transaction, error)
 	IsTransactionExists(id string) (bool, error)
+	WithTrx(fn func(txRepo TransactionRepository) error) error
 }
 
 type transactionRepository struct {
@@ -33,4 +34,11 @@ func (r *transactionRepository) IsTransactionExists(id string) (bool, error) {
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (r *transactionRepository) WithTrx(fn func(txRepo TransactionRepository) error) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		txRepo := NewTransactionRepository(tx)
+		return fn(txRepo)
+	})
 }
