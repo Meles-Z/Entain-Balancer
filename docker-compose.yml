@@ -1,23 +1,32 @@
 version: '3.8'
 
 services:
-  golang-backend:
-    container_name: entainbalancer-api
+  api: 
+    container_name: entain-balancer-api  
     build:
       context: .
       dockerfile: Dockerfile
     env_file:
       - .env
     depends_on:
-      - postgres-db
+      postgres: 
+        condition: service_healthy
     ports:
       - "${SERVER_PORT:-8080}:8080"
-    # DON'T mount volume unless using live reload
-    volumes: []  # safe for production
+    volumes: []
+    networks:
+      - entain-network
+    # Production-safe defaults:
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-  postgres-db:
+  postgres:  
     image: postgres:17
-    container_name: entainbalancer-db
+    container_name: entain-balancer-postgres 
     restart: unless-stopped
     env_file:
       - .env
@@ -29,11 +38,20 @@ services:
       - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - entain-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s  # Added for slow-starting DBs
 
 volumes:
   postgres_data:
+    name: entain-balancer-postgres-data  
+
+networks:
+  entain-network:
+    name: entain-balancer-network  
+    driver: bridge
