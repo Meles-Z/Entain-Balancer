@@ -8,7 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/meles-z/entainbalancer/internal/domain/transaction"
-	"github.com/meles-z/entainbalancer/internal/infrastucture/logger"
+	"github.com/meles-z/entainbalancer/internal/infrastructure/logger"
 )
 
 func (h *Handler) UpdateTransaction(w http.ResponseWriter, r *http.Request) {

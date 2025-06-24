@@ -6,7 +6,8 @@ import (
 	"github.com/meles-z/entainbalancer/internal/config"
 	"github.com/meles-z/entainbalancer/internal/domain/transaction"
 	"github.com/meles-z/entainbalancer/internal/domain/user"
-	"github.com/meles-z/entainbalancer/internal/infrastucture/db"
+	"github.com/meles-z/entainbalancer/internal/infrastructure/db"
+	"github.com/meles-z/entainbalancer/internal/infrastructure/logger"
 )
 
 func main() {
@@ -18,9 +19,14 @@ func main() {
 	}
 	cfg.DB.Host = "localhost"
 
+	if err := logger.Init(cfg.Auth.AppEnv); err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+	defer logger.Sync()
+
 	db, err := db.InitDB(&cfg.DB)
 	if err != nil {
-		log.Fatal("Failed to initialize database:", err)
+		logger.Fatal("Failed to initialize database:", "error", err)
 	}
 
 	// Drop tables
@@ -31,9 +37,9 @@ func main() {
 
 	for _, table := range tables {
 		if err := db.Migrator().DropTable(table); err != nil {
-			log.Printf("Error dropping table %T: %v\n", table, err)
+			logger.Error("Error dropping table %T: %v\n", table, err)
 		} else {
-			log.Printf("Successfully dropped table %T\n", table)
+			logger.Info("Successfully dropped table %T\n", table)
 		}
 	}
 

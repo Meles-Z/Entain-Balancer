@@ -9,8 +9,8 @@ import (
 	"github.com/meles-z/entainbalancer/internal/domain/transaction"
 	uow "github.com/meles-z/entainbalancer/internal/domain/unit_of_work"
 	"github.com/meles-z/entainbalancer/internal/domain/user"
-	"github.com/meles-z/entainbalancer/internal/infrastucture/db"
-	"github.com/meles-z/entainbalancer/internal/infrastucture/logger"
+	"github.com/meles-z/entainbalancer/internal/infrastructure/db"
+	"github.com/meles-z/entainbalancer/internal/infrastructure/logger"
 )
 
 func Server() {
@@ -19,7 +19,7 @@ func Server() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	if err := logger.Init(cfg.Auth.Appenv); err != nil {
+	if err := logger.Init(cfg.Auth.AppEnv); err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
 	defer logger.Sync()

@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/meles-z/entainbalancer/internal/domain/user"
-	"github.com/meles-z/entainbalancer/internal/infrastucture/logger"
+	"github.com/meles-z/entainbalancer/internal/infrastructure/logger"
 )
 
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {

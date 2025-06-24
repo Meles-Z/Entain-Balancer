@@ -1,13 +1,14 @@
 package config
 
 import (
-	"github.com/meles-z/entainbalancer/internal/infrastucture/logger"
+	"fmt"
+
 	"github.com/spf13/viper"
 )
 
 // Config holds all configuration for the application
 type Config struct {
-	DB   DatabaseConfig
+	DB DatabaseConfig
 	Auth Auth
 }
 
@@ -20,8 +21,8 @@ type DatabaseConfig struct {
 	DBName   string
 }
 
-type Auth struct {
-	Appenv string
+type Auth struct{
+	AppEnv string 
 }
 
 // LoadConfig initializes and returns the application configuration
@@ -33,10 +34,10 @@ func LoadConfig() (*Config, error) {
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			logger.Error("Error reading config file:", "error", err)
+			fmt.Println("Error reading config file:", err)
 			return nil, err
 		}
-		logger.Warn("No .env file found, using system env vars", "error", err)
+		fmt.Println("No .env file found, using system env vars")
 	}
 
 	cfg := &Config{
@@ -48,7 +49,7 @@ func LoadConfig() (*Config, error) {
 			DBName:   viper.GetString("DB_NAME"),
 		},
 		Auth: Auth{
-			Appenv: viper.GetString("APP_ENV"),
+			AppEnv: viper.GetString("APP_ENV"),
 		},
 	}
 
