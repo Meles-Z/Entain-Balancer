@@ -8,7 +8,7 @@ I’ve designed this project using a modular architecture to ensure high scalabi
 
 ---
 
-#### Below is the best way to run this project in your development environment:####
+#### Below is the best way to run this project in your development environment
 
 Before proceeding, I recommend that you check the Makefile.
 
@@ -32,7 +32,7 @@ Before proceeding, I recommend that you check the Makefile.
 
    You can now send requests and receive responses from the available endpoints.
 
-## ✅ Optionals#####
+## ✅ Optionals
 
 1. Start containers without rebuilding (optional)  
    Use this command if you’ve already built the project and only want to start the containers.
