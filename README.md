@@ -80,10 +80,10 @@ Sample Response:
 
 POST http://localhost:8080/user/2/transaction
 
-Headers:
-
-Content-Type: application/json
+**Headers:**  
+Content-Type: application/json<br>
 Source-Type: game (Options: game, server, payment, etc.)
+
 ```json
 {
   "state": "win",         // Options: "win" or "lost"
