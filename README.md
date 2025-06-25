@@ -52,12 +52,5 @@ Before proceeding, I recommend that you check the Makefile.
 
 ---
 
-## ✅ Summary
+## See more commands in Makefile 
 
-- Dockerized Go application
-- PostgreSQL database with GORM
-- Structured logging with Zap
-- Clean and scalable folder architecture
-- Makefile for automated workflow
-
----
