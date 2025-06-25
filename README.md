@@ -8,9 +8,9 @@ I’ve designed this project using a modular architecture to ensure high scalabi
 
 ---
 
-#### Below is the best way to run this project in your development environment
+## Below is the best way to run this project in your development environment
 
-Before proceeding, I recommend that you check the Makefile.
+# Before proceeding, I recommend that you check the Makefile.
 
 ## How to Run the Project
 
@@ -57,7 +57,7 @@ You can test the API using **Postman**, **Insomnia**, or any other API client of
 
 ---
 
-### 🔍 Get User Balance
+## 🔍 Get User Balance
 
 **Request:**
 
@@ -118,6 +118,4 @@ Status code distribution:
 This output shows that only one request succeeded. The remaining 409 errors are due to repeated use of the same transactionId, as the system ensures idempotency by allowing only one transaction per unique ID.
 
 
-
-## See more commands in Makefile 
 
