@@ -98,7 +98,7 @@ Source-Type: game (Options: game, server, payment, etc.)
 
 Use the hey CLI tool to test how many requests per second your service can handle:
 
-<pre lang="markdown"> ```bash hey -n 1000 -c 30 -m POST \ -H "Content-Type: application/json" \ -H "Source-Type: game" \ -d '{"state":"win", "amount":"10.00", "transactionId":"some-id-123"}' \ http://localhost:8080/user/1/transaction ``` </pre>
+<pre lang="markdown"> bash hey -n 1000 -c 30 -m POST \ -H "Content-Type: application/json" \ -H "Source-Type: game" \ -d '{"state":"win", "amount":"10.00", "transactionId":"some-id-123"}' \ http://localhost:8080/user/1/transaction </pre>
 
 Sample Response:
 
