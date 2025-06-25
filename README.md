@@ -108,8 +108,8 @@ hey -n 1000 -c 30 -m POST \
 
 Sample Response:
 
+```bash
 Status code distribution:
-```
   [200] 1 responses
   [409] 985 responses
   [500] 4 responses
