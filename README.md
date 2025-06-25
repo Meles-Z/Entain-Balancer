@@ -1,14 +1,16 @@
 # Entain-Balancer
 
-Hi all 👋
+👋 Hi Technical Team,
 
-This project is structured for high scalability and maintainability.
+Thank you for taking the time to review my project.
 
-Below is the best way to run this project in your development environment:
+I’ve designed this project using a modular architecture to ensure high scalability, ease of maintenance, and smooth integration of new features. I'm eager to hear your feedback on what I've done well and where I can improve.
 
 ---
 
-### Before proceeding, I recommend that you check the Makefile. ###
+#### Below is the best way to run this project in your development environment:####
+
+Before proceeding, I recommend that you check the Makefile.
 
 ## How to Run the Project
 
